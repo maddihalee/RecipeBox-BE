@@ -130,4 +130,42 @@ app.MapGet("recipes/category/{category}", (RecipeBoxDbContext db, int categoryId
     return Results.Ok(recipes);
 });
 
+//Get a user's favorite recipes
+app.MapGet("/recipes/favorites/{userId}", (RecipeBoxDbContext db, int userId) =>
+{
+    var user = db.Users.Include(u => u.FavoriteRecipes).FirstOrDefault(x => x.Id == userId);
+    if (user == null)
+    {
+        return Results.NotFound();
+    }
+    var favoriteRecipes = user.FavoriteRecipes.ToList();
+    return Results.Ok(favoriteRecipes);
+});
+
+//Add to user's favorite recipes list
+app.MapPost("/recipes/addtofavorites", async (RecipeBoxDbContext db, int recipeId, int userId) =>
+{
+    var user = await db.Users
+    .Include(u => u.FavoriteRecipes)
+    .FirstOrDefaultAsync(x => x.Id == userId);
+
+    if (user == null)
+    {
+        return Results.NotFound();
+    }
+    var recipe = await db.Recipes.FindAsync(recipeId);
+    if (recipe == null)
+    {
+        return Results.NotFound("Recipe not found.");
+    }
+    var existingRecipe = user.FavoriteRecipes.FirstOrDefault(r => r.Id == recipeId);
+    if (existingRecipe != null)
+    {
+        return Results.BadRequest("Recipe already exists in user's favorites.");
+    }
+    user.FavoriteRecipes.Add(recipe);
+    await db.SaveChangesAsync();
+    return Results.Ok("Recipe added successfully!");
+});
+
 app.Run();
