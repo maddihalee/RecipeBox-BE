@@ -11,6 +11,7 @@ namespace RecipeBoxBE.Models
         public string Ingredients { get; set; }
         public int CategoryId { get; set; }
         public int UserId { get; set; }
+        public string ImgUrl { get; set; }
         public ICollection<User> Users { get; set; }
         public ICollection<Review> Reviews { get; set; }
     }
