@@ -56,6 +56,40 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+//Create User
+app.MapPost("/register", (RecipeBoxDbContext db, User user) =>
+{
+    db.Users.Add(user);
+    db.SaveChanges();
+    return Results.Created($"/user/{user.Id}", user);
+});
+
+//Check if the user is in the database
+app.MapGet("/checkuser/{uid}", (RecipeBoxDbContext db, string uid) =>
+{
+    var user = db.Users.Where(x => x.FirebaseUid == uid).ToList();
+    if (uid == null)
+    {
+        return Results.NotFound();
+    }
+    else
+    {
+        return Results.Ok(user);
+    }
+});
+
+//Get all users
+app.MapGet("/user", (RecipeBoxDbContext db) =>
+{
+    return db.Users.ToList();
+});
+
+//Get users by ID
+app.MapGet("/user/{id}", (RecipeBoxDbContext db, int id) =>
+{
+    var user = db.Users.Where(u => u.Id == id);
+    return user;
+});
 
 
 app.Run();
