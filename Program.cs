@@ -91,5 +91,43 @@ app.MapGet("/user/{id}", (RecipeBoxDbContext db, int id) =>
     return user;
 });
 
+//Get all recipes
+app.MapGet("/recipes", (RecipeBoxDbContext db) =>
+{
+    return db.Recipes.ToList();
+});
+
+//Create a recipe
+app.MapPost("/recipes", (RecipeBoxDbContext db, Recipe recipe) =>
+{
+    db.Recipes.Add(recipe);
+    db.SaveChanges();
+    return Results.Created($"/recipes/{recipe.Id}", recipe);
+});
+
+//Delete a recipe
+app.MapDelete("/recipes", (RecipeBoxDbContext db, int id) =>
+{
+    Recipe recipe = db.Recipes.SingleOrDefault(r => r.Id == id);
+    if (recipe == null)
+    {
+        return Results.NotFound();
+    }
+    db.Recipes.Remove(recipe);
+    db.SaveChanges();
+    return Results.NoContent();
+});
+
+//View recipes by Category
+app.MapGet("recipes/category/{category}", (RecipeBoxDbContext db, int categoryId) =>
+{
+    var category = db.Categories.Find(categoryId);
+    if (category == null)
+    {
+        return Results.NotFound();
+    }
+    var recipes = db.Recipes.Where(r => r.CategoryId == categoryId);
+    return Results.Ok(recipes);
+});
 
 app.Run();
