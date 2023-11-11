@@ -118,6 +118,25 @@ app.MapDelete("/recipes", (RecipeBoxDbContext db, int id) =>
     return Results.NoContent();
 });
 
+//Update a recipe
+app.MapPut("/recipes", (RecipeBoxDbContext db, int id, Recipe recipe) =>
+{
+    Recipe recipeToUpdate = db.Recipes.SingleOrDefault(recipe => recipe.Id == id);
+    if (recipeToUpdate == null)
+    {
+        return Results.NotFound();
+    }
+    recipeToUpdate.Name = recipe.Name;
+    recipeToUpdate.Ingredients = recipe.Ingredients;
+    recipeToUpdate.CategoryId = recipe.CategoryId;
+    recipeToUpdate.CookTime = recipe.CookTime;
+    recipeToUpdate.Directions = recipe.Directions;
+    recipeToUpdate.ImgUrl = recipe.ImgUrl;
+
+    db.SaveChanges();
+    return Results.NoContent();
+});
+
 //View recipes by Category
 app.MapGet("recipes/category/{category}", (RecipeBoxDbContext db, int categoryId) =>
 {
