@@ -200,4 +200,49 @@ app.MapPost("/recipes/addtofavorites", async (RecipeBoxDbContext db, int recipeI
     return Results.Ok("Recipe added successfully!");
 });
 
+//Get all reviews
+app.MapGet("/reviews", (RecipeBoxDbContext db) =>
+{
+    return db.Reviews.ToList();
+});
+
+//Get reviews by Recipe 
+app.MapGet("/recipes/{recipeId}/reviews", (RecipeBoxDbContext db, int recipeId) =>
+{
+    var recipe = db.Recipes.Include(r => r.Reviews).FirstOrDefault(r => r.Id == recipeId);
+    if (recipe == null)
+    {
+        return Results.NotFound();
+    }
+    var reviews = recipe.Reviews.ToList();
+    return Results.Ok(reviews);
+});
+
+app.MapPost("/reviews", (RecipeBoxDbContext db, Review review) =>
+{
+    db.Reviews.Add(review);
+    db.SaveChanges();
+    return Results.Created("reviews/{reviewId}", review);
+});
+
+app.MapDelete("/reviews/{reviewId}", (RecipeBoxDbContext db, int reviewId) =>
+{
+    Review review = db.Reviews.FirstOrDefault(r => r.Id == reviewId);
+    db.Reviews.Remove(review);
+    db.SaveChanges();
+    return Results.NoContent();
+});
+
+app.MapPut("/reviews/{reviewId}", (RecipeBoxDbContext db, int reviewId) =>
+{
+    Review reviewToUpdate = db.Reviews.FirstOrDefault(r => r.Id == reviewId);
+    if (reviewToUpdate == null)
+    {
+        return Results.NotFound();
+    }
+    reviewToUpdate.ReviewString = reviewToUpdate.ReviewString;
+    db.SaveChanges();
+    return Results.NoContent();
+});
+
 app.Run();
