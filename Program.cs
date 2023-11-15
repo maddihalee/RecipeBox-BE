@@ -61,7 +61,7 @@ app.MapPost("/register", (RecipeBoxDbContext db, User user) =>
 {
     db.Users.Add(user);
     db.SaveChanges();
-    return Results.Created($"/user/{user.Id}", user);
+    return Results.Created($"/user/user.Id", user);
 });
 
 //Check if the user is in the database
@@ -97,6 +97,13 @@ app.MapGet("/recipes", (RecipeBoxDbContext db) =>
     return db.Recipes.ToList();
 });
 
+//Get a single recipe
+app.MapGet("/recipe/{id}", (RecipeBoxDbContext db, int id) =>
+{
+    var recipes = db.Recipes.SingleOrDefault(x => x.Id == id);
+    return recipes;
+});
+
 //Create a recipe
 app.MapPost("/recipes", (RecipeBoxDbContext db, Recipe recipe) =>
 {
@@ -106,7 +113,7 @@ app.MapPost("/recipes", (RecipeBoxDbContext db, Recipe recipe) =>
 });
 
 //Delete a recipe
-app.MapDelete("/recipes", (RecipeBoxDbContext db, int id) =>
+app.MapDelete("/recipes/{id}", (RecipeBoxDbContext db, int id) =>
 {
     Recipe recipe = db.Recipes.SingleOrDefault(r => r.Id == id);
     if (recipe == null)
@@ -135,6 +142,12 @@ app.MapPut("/recipes", (RecipeBoxDbContext db, int id, Recipe recipe) =>
 
     db.SaveChanges();
     return Results.NoContent();
+});
+
+//Get all categories
+app.MapGet("/category", (RecipeBoxDbContext db) =>
+{
+    return db.Categories.ToList();
 });
 
 //View recipes by Category
