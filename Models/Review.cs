@@ -6,5 +6,7 @@
         public string ReviewString { get; set; }
         public int UserId { get; set; }
         public int RecipeId { get; set; }
+        public string photoUrl { get; set; }
+        public string userName { get; set; }
     }
 }

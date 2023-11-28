@@ -126,7 +126,7 @@ app.MapDelete("/recipes/{id}", (RecipeBoxDbContext db, int id) =>
 });
 
 //Update a recipe
-app.MapPut("/recipes", (RecipeBoxDbContext db, int id, Recipe recipe) =>
+app.MapPut("/recipes/{id}", (RecipeBoxDbContext db, int id, Recipe recipe) =>
 {
     Recipe recipeToUpdate = db.Recipes.SingleOrDefault(recipe => recipe.Id == id);
     if (recipeToUpdate == null)
@@ -151,14 +151,14 @@ app.MapGet("/category", (RecipeBoxDbContext db) =>
 });
 
 //View recipes by Category
-app.MapGet("recipes/category/{category}", (RecipeBoxDbContext db, int categoryId) =>
+app.MapGet("/recipes/category/{categoryId}", (RecipeBoxDbContext db, int categoryId) =>
 {
     var category = db.Categories.Find(categoryId);
     if (category == null)
     {
         return Results.NotFound();
     }
-    var recipes = db.Recipes.Where(r => r.CategoryId == categoryId);
+    var recipes = db.Recipes.Where(r => r.CategoryId == categoryId).ToList();
     return Results.Ok(recipes);
 });
 
@@ -175,22 +175,22 @@ app.MapGet("/recipes/favorites/{userId}", (RecipeBoxDbContext db, int userId) =>
 });
 
 //Add to user's favorite recipes list
-app.MapPost("/recipes/addtofavorites", async (RecipeBoxDbContext db, int recipeId, int userId) =>
+app.MapPost("/recipes/addtofavorites", async (RecipeBoxDbContext db, FavoriteRecipe favoriteRecipe) =>
 {
     var user = await db.Users
     .Include(u => u.FavoriteRecipes)
-    .FirstOrDefaultAsync(x => x.Id == userId);
+    .FirstOrDefaultAsync(x => x.Id == favoriteRecipe.userId);
 
     if (user == null)
     {
         return Results.NotFound();
     }
-    var recipe = await db.Recipes.FindAsync(recipeId);
+    var recipe = await db.Recipes.FindAsync(favoriteRecipe.recipeId);
     if (recipe == null)
     {
         return Results.NotFound("Recipe not found.");
     }
-    var existingRecipe = user.FavoriteRecipes.FirstOrDefault(r => r.Id == recipeId);
+    var existingRecipe = user.FavoriteRecipes.FirstOrDefault(r => r.Id == favoriteRecipe.recipeId);
     if (existingRecipe != null)
     {
         return Results.BadRequest("Recipe already exists in user's favorites.");
@@ -218,6 +218,7 @@ app.MapGet("/recipes/{recipeId}/reviews", (RecipeBoxDbContext db, int recipeId) 
     return Results.Ok(reviews);
 });
 
+//Create reviews
 app.MapPost("/reviews", (RecipeBoxDbContext db, Review review) =>
 {
     db.Reviews.Add(review);
@@ -225,6 +226,7 @@ app.MapPost("/reviews", (RecipeBoxDbContext db, Review review) =>
     return Results.Created("reviews/{reviewId}", review);
 });
 
+//Delete reviews
 app.MapDelete("/reviews/{reviewId}", (RecipeBoxDbContext db, int reviewId) =>
 {
     Review review = db.Reviews.FirstOrDefault(r => r.Id == reviewId);
@@ -233,14 +235,15 @@ app.MapDelete("/reviews/{reviewId}", (RecipeBoxDbContext db, int reviewId) =>
     return Results.NoContent();
 });
 
-app.MapPut("/reviews/{reviewId}", (RecipeBoxDbContext db, int reviewId) =>
+//Update reviews
+app.MapPut("/reviews/{id}", (RecipeBoxDbContext db, int id, Review review) =>
 {
-    Review reviewToUpdate = db.Reviews.FirstOrDefault(r => r.Id == reviewId);
+    Review reviewToUpdate = db.Reviews.FirstOrDefault(r => r.Id == id);
     if (reviewToUpdate == null)
     {
         return Results.NotFound();
     }
-    reviewToUpdate.ReviewString = reviewToUpdate.ReviewString;
+    reviewToUpdate.ReviewString = review.ReviewString;
     db.SaveChanges();
     return Results.NoContent();
 });

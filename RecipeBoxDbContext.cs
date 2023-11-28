@@ -41,7 +41,7 @@ public class RecipeBoxDbContext : DbContext
 
         modelBuilder.Entity<Review>().HasData(new Review[]
         {
-            new Review { Id = 1, RecipeId = 1, UserId = 1, ReviewString = "I love making this because it is so quick and easy!"}
+            new Review { Id = 1, RecipeId = 1, UserId = 1, ReviewString = "I love making this because it is so quick and easy!", photoUrl = "https://www.nylabone.com/-/media/project/oneweb/nylabone/images/dog101/activities-fun/10-great-small-dog-breeds/maltese-portrait.jpg", userName = "Maddihalee"}
         });
 
     }
